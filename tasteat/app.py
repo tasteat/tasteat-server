@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from recipes import Recipes
 
 app = Flask("tasteat")
+CORS(app)
 
 
 @app.route("/")
