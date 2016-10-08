@@ -1,17 +1,45 @@
 import db
 
 
-class Recipes:
-    def __init__(self, ingredients):
-        self.db = db.get_db()
-        self.founds = []
-        self.not_founds = []
-        self.ingredients = ingredients
-        self.get_ingredient_ids()
+class Recipes(object):
+    def __init__(self):
+        self._db = db.get_db()
+        self._founds = []
+        self._not_founds = []
+        self._extracted_ingredients = []
+
+        self._ingredients = []
+        self._fulltext = ''
+
+    @property
+    def ingredients(self):
+        return self._ingredients
+
+    @ingredients.setter
+    def ingredients(self, value):
+        if value is None:
+            value = []
+        elif not isinstance(value, list):
+            raise Exception('ingredients must be a list (got %s)' % type(value))
+        self._ingredients = value
+
+    @property
+    def fulltext(self):
+        return self._fulltext
+
+    @fulltext.setter
+    def fulltext(self, value):
+        if value is None:
+            value = ''
+        elif not isinstance(value, str) and not isinstance(value, unicode):
+            raise Exception('fullText must be a string (got %s)' % type(value))
+        self._fulltext = value
 
     def get_recipes(self):
+        self._get_ingredient_ids()
+
         sql = self._get_sql()
-        res = self.db.query(sql)
+        res = self._db.query(sql)
         recipes = []
         for row in res:
             recipes.append(row)
@@ -30,21 +58,26 @@ class Recipes:
     def _get_intersect_sql(self):
         intersect_sql = ''
 
-        for ingredient in self.founds:
+        for ingredient in self._founds:
             if intersect_sql != '':
                 intersect_sql += '\nintersect\n'
             intersect_sql += 'select recipe_id from recipe_ingredients where ingredient_id = {}'.format(ingredient)
 
         return intersect_sql
 
-    def get_ingredient_ids(self):
-        for ingredient in self.ingredients:
-            res = self.db.query(u'select id from ingredient where name = "{}" COLLATE NOCASE'.format(ingredient))
+    def _extract_ingredients(self):
+        return self._fulltext.split()
+
+    def _get_ingredient_ids(self):
+        total_ingredients = self._extract_ingredients() + self._ingredients
+
+        for ingredient in total_ingredients:
+            res = self._db.query(u'select id from ingredient where name = "{}" COLLATE NOCASE'.format(ingredient))
             found = None
             for row in res:
                 found = row['id']
                 break
             if found is None:
-                self.not_founds.append(ingredient)
+                self._not_founds.append(ingredient)
             else:
-                self.founds.append(found)
+                self._founds.append(found)

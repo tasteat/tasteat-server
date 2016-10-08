@@ -13,10 +13,11 @@ def hello_world():
 
 @app.route("/api/recipes")
 def api_get_recipes():
-    ingredients = request.args.getlist('ingredients')
-    recipes = Recipes(ingredients)
-    return jsonify(recipes=recipes.get_recipes(), not_found=recipes.not_founds), 200
+    recipes = Recipes()
+    recipes.ingredients = request.args.getlist('ingredients')
+    recipes.fulltext = request.args.get('fullText')
+    return jsonify(recipes=recipes.get_recipes(), not_found=recipes._not_founds), 200
 
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=True)
+    app.run(debug=True, use_reloader=True, host='0.0.0.0')
