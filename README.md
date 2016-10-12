@@ -7,6 +7,10 @@
 4. `pip install -r requirements.txt`
 5. `python tasteat/app.py`
 
+### Database configuration
+You need a MySQL database for this project. Scripts for table creation/population reside in the `doc` directory. After having the database setup, adjust the config files (see below) to match the database installation (server ip/user/pass/db).
+
+### App configuration
 You can set the environment variable `TASTEAT_CONFIG` to one of the values:
  - `development` (default if not set)
  - `production`
