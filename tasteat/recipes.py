@@ -1,9 +1,8 @@
-import db
+from db import db
 
 
 class Recipes(object):
     def __init__(self):
-        self._db = db.get_db()
         self._founds = []
         self._not_founds = []
         self._extracted_ingredients = []
@@ -39,7 +38,7 @@ class Recipes(object):
         self._get_ingredient_ids()
 
         sql = self._get_sql()
-        res = self._db.query(sql)
+        res = db.query(sql)
         recipes = []
         for row in res:
             recipes.append(row)
@@ -72,7 +71,7 @@ class Recipes(object):
         total_ingredients = self._extract_ingredients() + self._ingredients
 
         for ingredient in total_ingredients:
-            res = self._db.query(u'select id from ingredient where name = "{}" COLLATE NOCASE'.format(ingredient))
+            res = db.query(u'select id from ingredient where name = "{}" COLLATE NOCASE'.format(ingredient))
             found = None
             for row in res:
                 found = row['id']

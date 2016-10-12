@@ -1,8 +1,17 @@
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from recipes import Recipes
+from db import db
 
 app = Flask("tasteat")
+
+config_name = os.environ.get('TASTEAT_CONFIG', 'development')
+cfg = os.path.join(os.getcwd(), 'config', config_name + '.cfg')
+app.config.from_pyfile(cfg, silent=False)
+
+db.init_app(app)
+
 CORS(app)
 
 
@@ -20,4 +29,4 @@ def api_get_recipes():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=True, host='0.0.0.0')
+    app.run(host=app.config['HOST'])
