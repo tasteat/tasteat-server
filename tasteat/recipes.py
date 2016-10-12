@@ -45,24 +45,25 @@ class Recipes(object):
         return recipes
 
     def _get_sql(self):
-        intersect_sql = self._get_intersect_sql()
+        tables, join = self._get_joins()
         sql =\
             'select a.title, a.servings, a.total_time\
-            from   recipe a\
-            where  a.id in (\
+            from   recipe a{}\
+            where  1 = 1\
             {}\
-            )'.format(intersect_sql)
+            '.format(tables, join)
         return sql
 
-    def _get_intersect_sql(self):
-        intersect_sql = ''
-
+    def _get_joins(self):
+        letter_num = ord('b')
+        join = ''
+        tables = ''
         for ingredient in self._founds:
-            if intersect_sql != '':
-                intersect_sql += '\nintersect\n'
-            intersect_sql += 'select recipe_id from recipe_ingredients where ingredient_id = {}'.format(ingredient)
-
-        return intersect_sql
+            letter = chr(letter_num)
+            join += 'and {}.recipe_id = a.id and {}.ingredient_id = {}\n'.format(letter, letter, ingredient)
+            tables += ', recipe_ingredients {}'.format(letter)
+            letter_num += 1
+        return tables, join
 
     def _extract_ingredients(self):
         return self._fulltext.split()
@@ -71,7 +72,8 @@ class Recipes(object):
         total_ingredients = self._extract_ingredients() + self._ingredients
 
         for ingredient in total_ingredients:
-            res = db.query(u'select id from ingredient where name = "{}" COLLATE NOCASE'.format(ingredient))
+            sql = u'select id from ingredient where name = "{}"'.format(ingredient)
+            res = db.query(sql)
             found = None
             for row in res:
                 found = row['id']
