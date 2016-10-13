@@ -9,6 +9,7 @@ class Recipes(object):
 
         self._ingredients = []
         self._fulltext = ''
+        self._lang = ''
 
     @property
     def ingredients(self):
@@ -34,6 +35,18 @@ class Recipes(object):
             raise Exception('fullText must be a string (got %s)' % type(value))
         self._fulltext = value
 
+    @property
+    def lang(self):
+        return self._lang
+
+    @lang.setter
+    def lang(self, value):
+        if value is None:
+            value = ''
+        elif not isinstance(value, str) and not isinstance(value, unicode):
+            raise Exception('lang must be a string (got %s)' % type(value))
+        self._lang = value
+
     def get_recipes(self):
         self._get_ingredient_ids()
 
@@ -46,12 +59,14 @@ class Recipes(object):
 
     def _get_sql(self):
         tables, join = self._get_joins()
+        lang = 'and a.lang = "{}"'.format(self.lang) if self.lang else ''
         sql =\
             'select a.title, a.servings, a.total_time\
             from   recipe a{}\
             where  1 = 1\
             {}\
-            '.format(tables, join)
+            {}\
+            '.format(tables, lang, join)
         return sql
 
     def _get_joins(self):
@@ -70,13 +85,14 @@ class Recipes(object):
 
     def _get_ingredient_ids(self):
         total_ingredients = self._extract_ingredients() + self._ingredients
+        lang = 'and lang = "{}"'.format(self.lang) if self.lang else ''
 
         for ingredient in total_ingredients:
-            sql = u'select id from ingredient where name = "{}"'.format(ingredient)
+            sql = u'select ingredient_id from ingredient_translation where name = "{}" {}'.format(ingredient, lang)
             res = db.query(sql)
             found = None
             for row in res:
-                found = row['id']
+                found = row['ingredient_id']
                 break
             if found is None:
                 self._not_founds.append(ingredient)
