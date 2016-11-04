@@ -61,7 +61,7 @@ class Recipes(object):
         tables, join = self._get_joins()
         lang = 'and a.lang = "{}"'.format(self.lang) if self.lang else ''
         sql =\
-            'select a.title, a.servings, a.total_time\
+            'select a.title, a.servings, a.total_time, a.category_id as category\
             from   recipe a{}\
             where  1 = 1\
             {}\

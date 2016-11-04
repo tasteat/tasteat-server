@@ -1,5 +1,5 @@
--- CREATE DATABASE tasteat CHARACTER SET utf8;
-USE tasteat;
+-- CREATE DATABASE tasteat DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+--USE tasteat;
 
 drop table if exists lang;
 CREATE TABLE lang(
@@ -35,6 +35,36 @@ CREATE TABLE unit_translation (
   FOREIGN KEY (lang) REFERENCES lang(lang)
 );
 
+drop table if exists recipe_category;
+CREATE TABLE recipe_category(
+  id integer not null primary key auto_increment
+);
+
+drop table if exists recipe_category_translation;
+CREATE TABLE recipe_category_translation (
+  category_id integer not null,
+  lang varchar(10) not null,
+  name varchar(200) not null,
+  FOREIGN KEY (category_id) REFERENCES recipe_category(id),
+  FOREIGN KEY (lang) REFERENCES lang(lang)
+);
+
+drop table if exists total_time_category;
+CREATE TABLE total_time_category(
+  id integer not null primary key auto_increment,
+  min integer not null,
+  max integer not null
+);
+
+drop table if exists total_time_category_translation;
+CREATE TABLE total_time_category_translation (
+  category_id integer not null,
+  lang varchar(10) not null,
+  name varchar(200) not null,
+  FOREIGN KEY (category_id) REFERENCES total_time_category(id),
+  FOREIGN KEY (lang) REFERENCES lang(lang)
+);
+
 drop table if exists recipe;
 CREATE TABLE recipe(
   id integer not null primary key auto_increment,
@@ -43,7 +73,9 @@ CREATE TABLE recipe(
   directions text,
   servings integer,
   total_time integer,
-  FOREIGN KEY (lang) REFERENCES lang(lang)
+  category_id integer,
+  FOREIGN KEY (lang) REFERENCES lang(lang),
+  FOREIGN KEY (category_id) REFERENCES recipe_category(id)
 );
 
 drop table if exists recipe_ingredients;
@@ -56,4 +88,3 @@ CREATE TABLE recipe_ingredients(
   FOREIGN KEY (ingredient_id) REFERENCES ingredient(id),
   PRIMARY KEY (recipe_id, ingredient_id)
 );
-
