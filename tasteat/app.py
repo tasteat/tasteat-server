@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from recipes import Recipes
 from filters import Filters
+from recipe_info import Recipe_info
 from db import db
 
 app = Flask("tasteat")
@@ -37,6 +38,16 @@ def api_get_filters():
     recipe_categories = filters.get_recipe_categories()
     total_time_categories = filters.get_total_time_categories()
     return jsonify(recipe_categories=recipe_categories, total_time_categories=total_time_categories), 200
+
+
+@app.route("/api/get_recipe/")
+def api_get_recipe():
+    recipe = Recipe_info()
+    recipe.recipe_id = request.args.get('id')
+    recipe.lang = request.args.get('lang')
+    recipe.get_directions()
+    recipe.get_ingredients()
+    return jsonify(ingredients=recipe.ingredients, directions=recipe.directions), 200
 
 
 if __name__ == "__main__":
